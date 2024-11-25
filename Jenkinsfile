@@ -70,13 +70,13 @@ pipeline {
         }
 
         stage('Check SCA Result') {
-    steps {
-        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-            script {
-                // Your SCA script
+            when {
+                expression { return env.CAN_PROCEED_SCA != 'true' }
+            }
+            steps {
+                error "SCA scan failed. Deployment cancelled."
             }
         }
-    }
 
         stage('Perform SAST Scan') {
             when {
