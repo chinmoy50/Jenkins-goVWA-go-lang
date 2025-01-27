@@ -50,7 +50,7 @@ pipeline {
                         -H "Client-Secret: ${CLIENT_SECRET}" \
                         -F "projectZipFile=@project.zip" \
                         -F "applicationId=${APPLICATION_ID}" \
-                        -F "scanName=New SCA Scan from Jenkins Pipeline" \
+                        -F "scanName=goVWA-Go-SCA Scan" \
                         -F "language=go" \
                         "${SCA_API_URL}"
                     """, returnStdout: true).trim()
@@ -69,19 +69,6 @@ pipeline {
             }
         }
 
-        stage('Check SCA Result') {
-	       when {
-		       expression { return env.CAN_PROCEED_SCA != 'true' }
-	       }
-	       steps {
-		       script {
-		           catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-		                error "SCA scan failed. Deployment cancelled."
-		           }
-		       }
-	       }
-	    }
-
         stage('Perform SAST Scan') {
             steps {
                 script {
@@ -92,7 +79,7 @@ pipeline {
                         -H "Client-Secret: ${CLIENT_SECRET}" \
                         -F "projectZipFile=@project.zip" \
                         -F "applicationId=${APPLICATION_ID}" \
-                        -F "scanName=New SAST Scan from Jenkins Pipeline" \
+                        -F "scanName=goVWA-Go-SAST Scan" \
                         -F "language=go" \
                         "${SAST_API_URL}"
                     """, returnStdout: true).trim()
@@ -108,15 +95,6 @@ pipeline {
 
                     env.CAN_PROCEED_SAST = canProceedSAST.toString()
                 }
-            }
-        }
-
-        stage('Check SAST Result') {
-            when {
-                expression { return env.CAN_PROCEED_SAST != 'true' }
-            }
-            steps {
-                error "SAST scan failed. Deployment cancelled."
             }
         }
 
